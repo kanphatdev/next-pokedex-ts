@@ -2,6 +2,7 @@ import { BookOpen, ShoppingBasket } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
+import usePokeQuantity from "../context/PokeQuantityContext";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -21,6 +22,10 @@ interface PokemonDetails {
 
 export default function PekeList({ name, url, imageUrl }: PekeListProps) {
   const { data, error } = useSWR<PokemonDetails>(url, fetcher);
+  const { cart, increase, decrease, removeFromCart } = usePokeQuantity();
+
+  // ✅ ตรวจสอบจำนวน Pokémon ใน cart อย่างถูกต้อง
+  const quantity = cart.filter((item) => item.name === name).length;
 
   return (
     <ul className="list bg-base-100 rounded-box shadow-md w-full">
@@ -39,11 +44,24 @@ export default function PekeList({ name, url, imageUrl }: PekeListProps) {
           </div>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-primary capitalize" title="Add to Pocket">
-            <ShoppingBasket />
-          </button>
-          <Link
-          href={`/details/${name}`} className="btn btn-secondary capitalize">
+          {/* ✅ ตรวจสอบว่ามี Pokémon ใน cart หรือไม่ */}
+          {quantity > 0 ? (
+            <div className="flex items-center gap-2">
+              <button onClick={() => decrease(name)} className="btn btn-sm btn-secondary">-</button>
+              <span className="text-lg font-bold">{quantity}</span>
+              <button onClick={() => increase({ name, image: imageUrl, types: data?.types.map(t => t.type.name) || [] })} className="btn btn-sm btn-primary">+</button>
+              <button onClick={() => removeFromCart(name)} className="btn btn-sm btn-error">✖</button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => increase({ name, image: imageUrl, types: data?.types.map(t => t.type.name) || [] })} 
+              className="btn btn-primary capitalize"
+              title="Add to Pocket"
+            >
+              <ShoppingBasket />
+            </button>
+          )}
+          <Link href={`/details/${name}`} className="btn btn-secondary capitalize">
             <BookOpen />
           </Link>
         </div>

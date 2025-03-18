@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import BaseLayout from "./layout/BaseLayout";
+import { PokeQuantityProvider } from "./context/PokeQuantityContext";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,10 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <BaseLayout>{children}</BaseLayout>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <PokeQuantityProvider> {/* ครอบ Provider ตรงนี้ */}
+          <BaseLayout>{children}</BaseLayout>
+        </PokeQuantityProvider>
       </body>
     </html>
   );

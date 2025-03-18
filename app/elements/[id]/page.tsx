@@ -50,7 +50,14 @@ export default function PokeElementPage() {
 function PokeCardFetcher({ url }: { url: string }) {
   const { data, error } = useSWR(url, fetcher);
 
-  if (!data) return <div>Loading...</div>;
+  if (!data) return <div>
+    <div className="flex w-52 flex-col gap-4">
+  <div className="skeleton h-32 w-full"></div>
+  <div className="skeleton h-4 w-28"></div>
+  <div className="skeleton h-4 w-full"></div>
+  <div className="skeleton h-4 w-full"></div>
+</div>
+  </div>;
   if (error) return <div>Error loading Pokémon</div>;
 
   const pokemonData = {

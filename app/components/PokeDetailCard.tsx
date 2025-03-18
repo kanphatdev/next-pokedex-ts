@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import usePokeQuantity from "../context/PokeQuantityContext"; // ✅ เพิ่มการใช้งาน Cart
 
 interface PokemonData {
   id: number;
@@ -34,9 +35,14 @@ interface PokeDetailCardProps {
 }
 
 export default function PokeDetailCard({ pokemon }: PokeDetailCardProps) {
+  const { cart, increase, decrease, removeFromCart } = usePokeQuantity();
+
+  // นับจำนวน Pokémon ที่มีอยู่ใน cart
+  const quantity = cart.filter((item) => item.name === pokemon.name).length;
+
   return (
     <div className="card bg-base-100 shadow-sm p-4 flex flex-col items-center text-center">
-      {/* Centered Image */}
+      {/* รูปภาพ */}
       <figure className="w-64 h-64 flex justify-center items-center">
         <Image
           src={pokemon.sprites.other["official-artwork"].front_default}
@@ -70,6 +76,7 @@ export default function PokeDetailCard({ pokemon }: PokeDetailCardProps) {
             ))}
           </ul>
 
+          {/* แสดงประเภทของ Pokémon */}
           <div className="flex gap-2 justify-center mt-4">
             {pokemon.types.map((t) => (
               <span key={t.type.name} className="badge badge-soft badge-accent text-sm capitalize">
@@ -79,6 +86,23 @@ export default function PokeDetailCard({ pokemon }: PokeDetailCardProps) {
           </div>
         </div>
 
+        {/* ปุ่มเพิ่ม / ลด / ลบ Pokémon */}
+        <div className="card-actions flex flex-col gap-2 mt-4">
+          {quantity > 0 ? (
+            <div className="flex items-center gap-2 w-full">
+              <button onClick={() => decrease(pokemon.name)} className="btn btn-sm btn-secondary flex-1">-</button>
+              <span className="text-lg font-bold">{quantity}</span>
+              <button onClick={() => increase({ name: pokemon.name, image: pokemon.sprites.front_default, types: [] })} className="btn btn-sm btn-primary flex-1">+</button>
+              <button onClick={() => removeFromCart(pokemon.name)} className="btn btn-sm btn-error">✖</button>
+            </div>
+          ) : (
+            <button onClick={() => increase({ name: pokemon.name, image: pokemon.sprites.front_default, types: [] })} className="btn btn-sm btn-primary w-full">
+              Add to Pocket
+            </button>
+          )}
+        </div>
+
+        {/* ปุ่มย้อนกลับ */}
         <div className="card-actions justify-center mt-4">
           <Link href=".." className="btn btn-primary capitalize">
             <ArrowLeft /> Back
