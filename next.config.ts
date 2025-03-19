@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         hostname: 'raw.githubusercontent.com',
       
       },
+      {
+        protocol: "https",
+        hostname: "static.wikia.nocookie.net", // Official Pokémon site images
+      },
     ],
   },
 };

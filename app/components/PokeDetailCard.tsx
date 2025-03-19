@@ -9,10 +9,10 @@ interface PokemonData {
   height: number;
   weight: number;
   sprites: {
-    front_default: string;
+    front_default: string | null;
     other: {
       "official-artwork": {
-        front_default: string;
+        front_default: string | null;
       };
     };
   };
@@ -37,15 +37,24 @@ interface PokeDetailCardProps {
 export default function PokeDetailCard({ pokemon }: PokeDetailCardProps) {
   const { cart, increase, decrease, removeFromCart } = usePokeQuantity();
 
-  // นับจำนวน Pokémon ที่มีอยู่ใน cart
+  // ✅ คำนวณจำนวน Pokémon ใน cart
   const quantity = cart.filter((item) => item.name === pokemon.name).length;
+
+  // ✅ หา uniqueId ตัวแรกของ Pokémon ใน cart
+  const firstUniqueId = cart.find((item) => item.name === pokemon.name)?.uniqueId;
+
+  // ✅ เลือกรูป Pokémon ให้ถูกต้อง
+  const defaultImage = "/placeholder.png"; // รูป fallback ถ้าไม่มีภาพ
+  const pokemonImage = pokemon.sprites.other["official-artwork"].front_default || 
+                       pokemon.sprites.front_default || 
+                       defaultImage;
 
   return (
     <div className="card bg-base-100 shadow-sm p-4 flex flex-col items-center text-center">
       {/* รูปภาพ */}
       <figure className="w-64 h-64 flex justify-center items-center">
         <Image
-          src={pokemon.sprites.other["official-artwork"].front_default}
+          src={pokemonImage}
           alt={pokemon.name}
           width={200}
           height={200}
@@ -90,13 +99,33 @@ export default function PokeDetailCard({ pokemon }: PokeDetailCardProps) {
         <div className="card-actions flex flex-col gap-2 mt-4">
           {quantity > 0 ? (
             <div className="flex items-center gap-2 w-full">
-              <button onClick={() => decrease(pokemon.name)} className="btn btn-sm btn-secondary flex-1">-</button>
+              <button onClick={() => firstUniqueId && decrease(firstUniqueId)} className="btn btn-sm btn-secondary flex-1">
+                -
+              </button>
               <span className="text-lg font-bold">{quantity}</span>
-              <button onClick={() => increase({ name: pokemon.name, image: pokemon.sprites.front_default, types: [] })} className="btn btn-sm btn-primary flex-1">+</button>
-              <button onClick={() => removeFromCart(pokemon.name)} className="btn btn-sm btn-error">✖</button>
+              <button 
+                onClick={() => increase({ 
+                  name: pokemon.name, 
+                  image: pokemonImage, 
+                  types: pokemon.types.map(t => t.type.name) ?? [] 
+                })} 
+                className="btn btn-sm btn-primary flex-1"
+              >
+                +
+              </button>
+              <button onClick={() => firstUniqueId && removeFromCart(firstUniqueId)} className="btn btn-sm btn-error">
+                ✖
+              </button>
             </div>
           ) : (
-            <button onClick={() => increase({ name: pokemon.name, image: pokemon.sprites.front_default, types: [] })} className="btn btn-sm btn-primary w-full">
+            <button 
+              onClick={() => increase({ 
+                name: pokemon.name, 
+                image: pokemonImage, 
+                types: pokemon.types.map(t => t.type.name) ?? [] 
+              })} 
+              className="btn btn-sm btn-primary w-full"
+            >
               Add to Pocket
             </button>
           )}
